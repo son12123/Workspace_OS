@@ -1,50 +1,36 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "queue.h"
+#include "queue.h" 
 
-int empty(struct queue_t *q)
-{
-        if (q == NULL)
-        {
-                printf("Queue is NULL\n");
-                return -1;
-        }
-        return (q->size == 0);
+int empty(struct queue_t * q) {
+    if (q == NULL) return 1; 
+    return (q->size == 0);  
 }
 
-void enqueue(struct queue_t *q, struct pcb_t *proc)
-{
-        /* TODO: put a new process to queue [q] */
-        if (q->size < MAX_QUEUE_SIZE)
-                q->proc[q->size++] = proc;
+void enqueue(struct queue_t * q, struct pcb_t * proc) {
+    /* Thêm tiến trình mới vào hàng đợi [q] nếu chưa đầy */
+    if (q->size < MAX_QUEUE_SIZE) {
+        q->proc[q->size++] = proc; // Gán tiến trình vào vị trí cuối hàng và tăng size
+    }
 }
 
-struct pcb_t *dequeue(struct queue_t *q)
-{
-        /* TODO: return a pcb whose prioprity is the highest
-         * in the queue [q] and remember to remove it from q
-         * */
+// Hàm lấy tiến trình có độ ưu tiên cao nhất ra khỏi hàng đợi
+struct pcb_t * dequeue(struct queue_t * q) {
+    /* Trả về tiến trình có độ ưu tiên cao nhất trong hàng đợi [q]
+     * và loại bỏ tiến trình đó khỏi hàng
+     */
+    if (empty(q)) {
+        return NULL; // Nếu hàng đợi rỗng, trả về NULL
+    }
 
-        // Kiểm tra ngoại lệ
-        if (empty(q))
-                return NULL;
+    // **Hiện tại:** hàm giả định rằng phần tử đầu tiên là có độ ưu tiên cao nhất
+    struct pcb_t *proc = q->proc[0]; // Lưu tiến trình đầu tiên
 
-        // Tìm priority cao nhất trong queue [q]
-        int highestIndex = 0;
-        for (int i = 1; i < q->size; i++)
-        {
-                if (q->proc[i]->priority < q->proc[highestIndex]->priority)
-                {
-                        highestIndex = i;
-                }
-        }
-        // Xóa process có priority cao nhất
-        struct pcb_t *process = q->proc[highestIndex];
-        for (int i = highestIndex; i < q->size - 1; i++)
-        {
-                // Di chuyển các process còn lại về trước
-                q->proc[i] = q->proc[i + 1];
-        }
-        q->size--;
-        return process;
+    // Dời các phần tử còn lại sang trái để lấp chỗ trống
+    for (int i = 1; i < q->size; i++) {
+        q->proc[i - 1] = q->proc[i];
+    }
+
+    q->size--; // Giảm kích thước hàng đợi sau khi loại bỏ phần tử
+    return proc; // Trả về tiến trình đã lấy ra
 }
